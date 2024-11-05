@@ -1,0 +1,6 @@
+rootProject.name = 'deloitte-aws-sdk'
+file('.').listFiles()?.each { dir ->
+    if (dir.isDirectory() && file("${dir.name}/build.gradle").exists()) {
+        include dir.name
+    }
+}
