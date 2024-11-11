@@ -10,7 +10,9 @@ aws:
     localstack:
       endpoint: http://localhost:4566
 
-my-queue-sqs-consumer:
+my-queue-sqs:
+  consumer:
+    waitTimeSeconds: 3
+    maxNumberOfMessages: 10
+    pollingInterval: 5000
   url: http://sqs.ap-southeast-1.localhost.localstack.cloud:4566/000000000000/my-queue
-  maxNumberOfMessages: 10
-  waitTimeSeconds: 3

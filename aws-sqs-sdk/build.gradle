@@ -3,4 +3,5 @@ dependencies {
 	implementation "software.amazon.awssdk:s3:${awsSdkVersion}"
 	implementation "software.amazon.awssdk:sqs:${awsSdkVersion}"
 	implementation "software.amazon.awssdk:dynamodb:${awsSdkVersion}"
+	implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 }
