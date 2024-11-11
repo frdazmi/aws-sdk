@@ -1,0 +1,9 @@
+dependencies {
+	implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+	implementation "software.amazon.awssdk:core:${awsSdkVersion}"
+	implementation "software.amazon.awssdk:sqs:${awsSdkVersion}"
+
+	implementation project(':aws-sqs-sdk')
+
+	implementation "org.springframework:spring-context:${springVersion}"
+}

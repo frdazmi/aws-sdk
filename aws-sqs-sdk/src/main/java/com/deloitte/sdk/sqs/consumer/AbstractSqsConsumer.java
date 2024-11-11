@@ -1,8 +1,9 @@
-package com.deloitte.sdk.sqs;
+package com.deloitte.sdk.sqs.consumer;
 
 
 import com.deloitte.sdk.sqs.exceptions.SkipTaskException;
-import com.deloitte.sdk.sqs.handler.SqsMessageHandler;
+import lombok.Builder;
+import lombok.Getter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.sqs.SqsClient;
@@ -12,20 +13,25 @@ import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
 import java.util.concurrent.Executor;
 
+
+/**
+ * Abstract class for consuming messages from an Amazon SQS queue.
+ * Subclasses must implement the {@link #getConfig()} and {@link #handleMessage(Message)} methods.
+ * subclasses need to call the {@link #pollQueueMessages()} method to start polling the SQS queue.
+ * You can use the @Scheduled annotation to schedule this method to run at fixed intervals.
+ */
 public abstract class AbstractSqsConsumer {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractSqsConsumer.class);
     private final SqsClient sqsClient;
-    private final SqsMessageHandler handler;
     private final Executor workerPool;
 
-    public AbstractSqsConsumer(SqsClient sqsClient, SqsMessageHandler handler, Executor workerPool) {
+    public AbstractSqsConsumer(SqsClient sqsClient, Executor workerPool) {
         this.sqsClient = sqsClient;
-        this.handler = handler;
         this.workerPool = workerPool;
     }
 
-    public void pollQueueMessages() {
+    protected void pollQueueMessages() {
         Config config = getConfig();
 
         ReceiveMessageRequest receiveMessageRequest = ReceiveMessageRequest.builder()
@@ -38,7 +44,7 @@ public abstract class AbstractSqsConsumer {
                 .messages()
                 .forEach(message -> workerPool.execute(() -> {
                     try {
-                        handler.handleMessage(message);
+                        handleMessage(message);
                         deleteMessage(config.getQueueUrl(), message);
                     } catch (SkipTaskException e) {
                         logger.info("Skipping message: {}", message.body());
@@ -50,6 +56,8 @@ public abstract class AbstractSqsConsumer {
 
     protected abstract Config getConfig();
 
+    protected abstract void handleMessage(Message message);
+
     private void deleteMessage(String queueUrl, Message message) {
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(queueUrl)
@@ -57,10 +65,13 @@ public abstract class AbstractSqsConsumer {
                 .build());
     }
 
-
+    @Builder
+    @Getter
     public static class Config {
         private final String queueUrl;
+        @Builder.Default
         private int maxNumberOfMessages = 10;
+        @Builder.Default
         private int waitTimeSeconds = 5;
 
         public Config(String queueUrl) {
@@ -71,18 +82,6 @@ public abstract class AbstractSqsConsumer {
             this.queueUrl = queueUrl;
             this.maxNumberOfMessages = maxNumberOfMessages;
             this.waitTimeSeconds = waitTimeSeconds;
-        }
-
-        public String getQueueUrl() {
-            return queueUrl;
-        }
-
-        public int getMaxNumberOfMessages() {
-            return maxNumberOfMessages;
-        }
-
-        public int getWaitTimeSeconds() {
-            return waitTimeSeconds;
         }
     }
 
