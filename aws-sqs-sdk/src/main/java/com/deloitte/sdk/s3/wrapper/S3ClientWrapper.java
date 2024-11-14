@@ -3,18 +3,30 @@ package com.deloitte.sdk.s3.wrapper;
 import com.deloitte.sdk.s3.exceptions.S3SdkException;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.presigner.S3Presigner;
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PresignedPutObjectRequest;
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.io.InputStream;
+import java.net.URL;
 import java.nio.file.Path;
+import java.time.Duration;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class S3ClientWrapper {
 
     private final S3Client s3Client;
+    private final S3Presigner s3Presigner;
 
     public S3ClientWrapper(S3Client s3Client) {
         this.s3Client = s3Client;
+        this.s3Presigner = S3Presigner.builder()
+                .credentialsProvider(s3Client.serviceClientConfiguration().credentialsProvider())
+                .region(s3Client.serviceClientConfiguration().region())
+                .build();
     }
 
     public void createBucket(String bucketName) throws S3SdkException {
@@ -76,6 +88,48 @@ public class S3ClientWrapper {
             return response.contents().stream().map(S3Object::key).collect(Collectors.toList());
         } catch (S3Exception e) {
             throw new S3SdkException("Failed to list objects in bucket: " + bucketName, e);
+        }
+    }
+
+    // Presigned URL Methods
+
+    public URL generatePresignedUrlForDownload(String bucketName, String key, Duration expiration) throws S3SdkException {
+        try {
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .signatureDuration(expiration)
+                    .getObjectRequest(getObjectRequest)
+                    .build();
+
+            PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(presignRequest);
+
+            return presignedGetObjectRequest.url();
+        } catch (Exception e) {
+            throw new S3SdkException("Failed to generate presigned URL for download", e);
+        }
+    }
+
+    public URL generatePresignedUrlForUpload(String bucketName, String key, Duration expiration) throws S3SdkException {
+        try {
+            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(key)
+                    .build();
+
+            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+                    .signatureDuration(expiration)
+                    .putObjectRequest(putObjectRequest)
+                    .build();
+
+            PresignedPutObjectRequest presignedPutObjectRequest = s3Presigner.presignPutObject(presignRequest);
+
+            return presignedPutObjectRequest.url();
+        } catch (Exception e) {
+            throw new S3SdkException("Failed to generate presigned URL for upload", e);
         }
     }
 }
