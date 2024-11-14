@@ -1,8 +1,21 @@
 package com.deloitte.sdk.s3.wrapper;
 
 import com.deloitte.sdk.s3.exceptions.S3SdkException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.*;
+import software.amazon.awssdk.services.s3.model.Bucket;
+import software.amazon.awssdk.services.s3.model.CopyObjectRequest;
+import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteBucketRequest;
+import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
+import software.amazon.awssdk.services.s3.model.GetObjectRequest;
+import software.amazon.awssdk.services.s3.model.ListBucketsResponse;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
+import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
+import software.amazon.awssdk.services.s3.model.S3Object;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 import software.amazon.awssdk.services.s3.presigner.model.PresignedGetObjectRequest;
@@ -17,6 +30,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class S3ClientWrapper {
+
+    private static final Logger logger = LoggerFactory.getLogger(S3ClientWrapper.class);
 
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
@@ -88,6 +103,22 @@ public class S3ClientWrapper {
             return response.contents().stream().map(S3Object::key).collect(Collectors.toList());
         } catch (S3Exception e) {
             throw new S3SdkException("Failed to list objects in bucket: " + bucketName, e);
+        }
+    }
+
+    public void copyObject(String sourceBucketName, String sourceKey, String destinationBucketName, String destinationKey) throws S3SdkException {
+        try {
+            CopyObjectRequest copyRequest = CopyObjectRequest.builder()
+                    .sourceBucket(sourceBucketName)
+                    .sourceKey(sourceKey)
+                    .destinationBucket(destinationBucketName)
+                    .destinationKey(destinationKey)
+                    .build();
+
+            s3Client.copyObject(copyRequest);
+            logger.info("Object copied successfully");
+        } catch (S3Exception e) {
+            throw new S3SdkException("Failed to copy object", e);
         }
     }
 
