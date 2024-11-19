@@ -1,6 +1,8 @@
 package com.deloitte.sdk.dynamodb.wrapper;
 
 import com.deloitte.sdk.dynamodb.exceptions.DynamoDbSdkException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
 import software.amazon.awssdk.services.dynamodb.model.AttributeDefinition;
 import software.amazon.awssdk.services.dynamodb.model.AttributeValue;
@@ -34,6 +36,7 @@ import java.util.Map;
 
 public class DynamoDbWrapper {
 
+    private static final Logger logger = LoggerFactory.getLogger(DynamoDbWrapper.class);
     private final DynamoDbClient dynamoDbClient;
 
     public DynamoDbWrapper(DynamoDbClient dynamoDbClient) {
@@ -52,7 +55,7 @@ public class DynamoDbWrapper {
                     .provisionedThroughput(provisionedThroughput)
                     .build();
             dynamoDbClient.createTable(request);
-            System.out.println("Table created successfully");
+            logger.info("Table {} created successfully", tableName);
         } catch (DynamoDbException e) {
             throw new DynamoDbSdkException("Failed to create table: " + tableName, e);
         }
@@ -64,7 +67,7 @@ public class DynamoDbWrapper {
                     .tableName(tableName)
                     .build();
             dynamoDbClient.deleteTable(request);
-            System.out.println("Table deleted successfully");
+            logger.info("Table {} deleted successfully", tableName);
         } catch (DynamoDbException e) {
             throw new DynamoDbSdkException("Failed to delete table: " + tableName, e);
         }
@@ -100,7 +103,6 @@ public class DynamoDbWrapper {
                     .item(item)
                     .build();
             dynamoDbClient.putItem(request);
-            System.out.println("Item inserted successfully");
         } catch (DynamoDbException e) {
             throw new DynamoDbSdkException("Failed to put item into table: " + tableName, e);
         }
@@ -127,7 +129,6 @@ public class DynamoDbWrapper {
                     .attributeUpdates(updates)
                     .build();
             dynamoDbClient.updateItem(request);
-            System.out.println("Item updated successfully");
         } catch (DynamoDbException e) {
             throw new DynamoDbSdkException("Failed to update item in table: " + tableName, e);
         }
@@ -140,7 +141,6 @@ public class DynamoDbWrapper {
                     .key(key)
                     .build();
             dynamoDbClient.deleteItem(request);
-            System.out.println("Item deleted successfully");
         } catch (DynamoDbException e) {
             throw new DynamoDbSdkException("Failed to delete item from table: " + tableName, e);
         }
@@ -188,7 +188,6 @@ public class DynamoDbWrapper {
                     .requestItems(requestItems)
                     .build();
             dynamoDbClient.batchWriteItem(request);
-            System.out.println("Batch write operation completed");
         } catch (DynamoDbException e) {
             throw new DynamoDbSdkException("Failed to perform batch write operation", e);
         }
