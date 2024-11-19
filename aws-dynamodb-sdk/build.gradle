@@ -1,11 +1,5 @@
-configurations {
-	compileOnly {
-		extendsFrom annotationProcessor
-	}
-}
-
 dependencies {
 	implementation "software.amazon.awssdk:core:${awsSdkVersion}"
-	implementation "software.amazon.awssdk:sqs:${awsSdkVersion}"
+	implementation "software.amazon.awssdk:dynamodb:${awsSdkVersion}"
 	implementation "com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}"
 }

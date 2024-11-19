@@ -36,12 +36,9 @@ public class S3ClientWrapper {
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
 
-    public S3ClientWrapper(S3Client s3Client) {
+    public S3ClientWrapper(S3Client s3Client, S3Presigner s3Presigner) {
         this.s3Client = s3Client;
-        this.s3Presigner = S3Presigner.builder()
-                .credentialsProvider(s3Client.serviceClientConfiguration().credentialsProvider())
-                .region(s3Client.serviceClientConfiguration().region())
-                .build();
+        this.s3Presigner = s3Presigner;
     }
 
     public void createBucket(String bucketName) throws S3SdkException {

@@ -1,7 +1,6 @@
 plugins {
 	id 'java'
-	id 'org.springframework.boot' version "${springBootVersion}"
-	id 'io.spring.dependency-management' version '1.1.6'
+	id 'jacoco'
 }
 
 group = 'com.deloitte.sdk'
@@ -15,8 +14,6 @@ allprojects {
 
 subprojects {
 	apply plugin: 'java'
-	apply plugin: 'io.spring.dependency-management'
-	apply plugin: 'org.springframework.boot'
 
 	java {
 		toolchain {
@@ -24,25 +21,15 @@ subprojects {
 		}
 	}
 
-	configurations {
-		compileOnly {
-			extendsFrom annotationProcessor
-		}
+	repositories {
+		mavenCentral()
 	}
 
 	dependencies {
-		compileOnly 'org.projectlombok:lombok'
-		developmentOnly 'org.springframework.boot:spring-boot-devtools'
+		testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
 
-		annotationProcessor 'org.projectlombok:lombok'
-		testImplementation 'org.springframework.boot:spring-boot-starter-test'
-		testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-	}
-
-	dependencyManagement {
-		imports {
-			mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
-		}
+		compileOnly "org.projectlombok:lombok:${lombokVersion}"
+		annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 	}
 
 	tasks.named('test') {
@@ -51,10 +38,11 @@ subprojects {
 }
 
 dependencies {
-	implementation "org.springframework.modulith:spring-modulith-starter-core:${springModulithVersion}"
-	testImplementation "org.springframework.modulith:spring-modulith-starter-test:${springModulithVersion}"
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
 	testImplementation platform('org.junit:junit-bom:5.10.0')
-	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
 }
 
+jacoco {
+	toolVersion = "0.8.11" // Specify the JaCoCo version
+}
