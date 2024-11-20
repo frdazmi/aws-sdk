@@ -48,6 +48,7 @@ public abstract class AbstractSqsConsumer {
                         deleteMessage(config.getQueueUrl(), message);
                     } catch (SkipTaskException e) {
                         logger.info("Skipping message: {}", message.body());
+                        deleteMessage(config.getQueueUrl(), message);
                     } catch (Exception e) {
                         logger.error("Error processing message: {}", message.body(), e);
                     }
@@ -56,7 +57,7 @@ public abstract class AbstractSqsConsumer {
 
     protected abstract Config getConfig();
 
-    protected abstract void handleMessage(Message message);
+    protected abstract void handleMessage(Message message) throws Exception;
 
     private void deleteMessage(String queueUrl, Message message) {
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
