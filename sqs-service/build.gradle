@@ -1,15 +1,15 @@
 plugins {
-	id 'org.springframework.boot' version "${springBootVersion}"
+    id 'org.springframework.boot' version "${springBootVersion}"
 
 }
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-	implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
-	implementation "software.amazon.awssdk:core:${awsSdkVersion}"
-	implementation "software.amazon.awssdk:sqs:${awsSdkVersion}"
-	implementation project(':aws-sqs-sdk')
-	implementation "org.springframework:spring-context:${springVersion}"
-	developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
-	testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
+    implementation "org.springframework.boot:spring-boot-starter:${springBootVersion}"
+    implementation "software.amazon.awssdk:core:${awsSdkVersion}"
+    implementation "software.amazon.awssdk:sqs:${awsSdkVersion}"
+    implementation project(':aws-sqs-sdk')
+    implementation "org.springframework:spring-context:${springVersion}"
+    developmentOnly "org.springframework.boot:spring-boot-devtools:${springBootVersion}"
+    testImplementation "org.springframework.boot:spring-boot-starter-test:${springBootVersion}"
 }

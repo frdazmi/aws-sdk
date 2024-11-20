@@ -5,10 +5,10 @@ spring:
     allow-bean-definition-overriding: true
 
 aws:
-    accessKeyId: abc
-    secretKey: def
-    localstack:
-      endpoint: http://localhost:4566
+  accessKeyId: abc
+  secretKey: def
+  localstack:
+    endpoint: http://localhost:4566
 
 my-queue-sqs:
   consumer:

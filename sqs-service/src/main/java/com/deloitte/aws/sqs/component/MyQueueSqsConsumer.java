@@ -13,7 +13,6 @@ import software.amazon.awssdk.services.sqs.SqsClient;
 import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.time.Instant;
-import java.time.LocalDate;
 import java.util.concurrent.Executor;
 
 @Component
@@ -47,6 +46,7 @@ public class MyQueueSqsConsumer extends AbstractSqsConsumer {
                 .waitTimeSeconds(waitTimeSeconds)
                 .build();
     }
+
     @Scheduled(fixedRateString = "${my-queue-sqs.consumer.pollingInterval}")
     public void pollQueueMessages() {
         super.pollQueueMessages();

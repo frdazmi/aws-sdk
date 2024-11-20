@@ -1,48 +1,52 @@
 plugins {
-	id 'java'
-	id 'jacoco'
+    id 'java'
+    id 'jacoco'
 }
 
 group = 'com.deloitte.sdk'
 version = '0.0.1-SNAPSHOT'
 
 allprojects {
-	repositories {
-		mavenCentral()
-	}
+    repositories {
+        mavenCentral()
+    }
 }
 
 subprojects {
-	apply plugin: 'java'
+    apply plugin: 'java'
 
-	java {
-		toolchain {
-			languageVersion = JavaLanguageVersion.of(21)
-		}
-	}
+    java {
+        toolchain {
+            languageVersion = JavaLanguageVersion.of(21)
+        }
+    }
 
-	repositories {
-		mavenCentral()
-	}
+    repositories {
+        mavenCentral()
+    }
 
-	dependencies {
-		testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
+    configurations {
+        compileOnly {
+            extendsFrom annotationProcessor
+        }
+    }
 
-		compileOnly "org.projectlombok:lombok:${lombokVersion}"
-		annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
-	}
+    dependencies {
+        compileOnly "org.projectlombok:lombok:${lombokVersion}"
+        annotationProcessor "org.projectlombok:lombok:${lombokVersion}"
 
-	tasks.named('test') {
-		useJUnitPlatform()
-	}
-}
+        testImplementation platform('org.junit:junit-bom:5.10.0')
+        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.3'
+        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.11.3'
+        testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
+        testImplementation "org.mockito:mockito-core:${mockitoVersion}"
+    }
 
-dependencies {
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.3'
-	testImplementation platform('org.junit:junit-bom:5.10.0')
-	testImplementation 'org.junit.jupiter:junit-jupiter:5.11.3'
+    tasks.named('test') {
+        useJUnitPlatform()
+    }
 }
 
 jacoco {
-	toolVersion = "0.8.11" // Specify the JaCoCo version
+    toolVersion = "0.8.11" // Specify the JaCoCo version
 }

@@ -2,7 +2,7 @@ package com.deloitte.sdk.sqs.serializer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class JsonMessageSerializer implements MessageSerializer{
+public class JsonMessageSerializer implements MessageSerializer {
 
     private final ObjectMapper objectMapper;
 

@@ -8,8 +8,8 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class DeloitteSqsService {
 
-	public static void main(String[] args) {
-		SpringApplication.run(DeloitteSqsService.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(DeloitteSqsService.class, args);
+    }
 
 }
