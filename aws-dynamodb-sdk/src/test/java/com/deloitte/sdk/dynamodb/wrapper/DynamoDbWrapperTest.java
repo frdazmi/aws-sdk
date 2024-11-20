@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.dynamodb.model.DeleteItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.DeleteTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableRequest;
 import software.amazon.awssdk.services.dynamodb.model.DescribeTableResponse;
+import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import software.amazon.awssdk.services.dynamodb.model.GetItemRequest;
 import software.amazon.awssdk.services.dynamodb.model.GetItemResponse;
 import software.amazon.awssdk.services.dynamodb.model.KeysAndAttributes;
@@ -37,7 +38,9 @@ import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -201,5 +204,174 @@ public class DynamoDbWrapperTest {
         when(dynamoDbClient.batchGetItem(any(BatchGetItemRequest.class))).thenReturn(response);
 
         assertEquals(response.responses(), dynamoDbWrapper.batchGetItems(requestItems));
+    }
+
+    @Test
+    void createTable_throwsException() {
+        CreateTableRequest request = CreateTableRequest.builder()
+                .tableName("testTable")
+                .attributeDefinitions(Collections.emptyList())
+                .keySchema(Collections.emptyList())
+                .provisionedThroughput(ProvisionedThroughput.builder().readCapacityUnits(5L).writeCapacityUnits(5L).build())
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).createTable(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.createTable("testTable", Collections.emptyList(), Collections.emptyList(), ProvisionedThroughput.builder().readCapacityUnits(5L).writeCapacityUnits(5L).build())
+        );
+    }
+
+    @Test
+    void deleteTable_throwsException() {
+        DeleteTableRequest request = DeleteTableRequest.builder()
+                .tableName("testTable")
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).deleteTable(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.deleteTable("testTable")
+        );
+    }
+
+    @Test
+    void describeTable_throwsException() {
+        DescribeTableRequest request = DescribeTableRequest.builder()
+                .tableName("testTable")
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).describeTable(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.describeTable("testTable")
+        );
+    }
+
+    @Test
+    void listTables_throwsException() {
+        doThrow(DynamoDbException.class).when(dynamoDbClient).listTables();
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.listTables()
+        );
+    }
+
+    @Test
+    void putItem_throwsException() {
+        Map<String, AttributeValue> item = new HashMap<>();
+        item.put("key", AttributeValue.builder().s("value").build());
+        PutItemRequest request = PutItemRequest.builder()
+                .tableName("testTable")
+                .item(item)
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).putItem(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.putItem("testTable", item)
+        );
+    }
+
+    @Test
+    void getItem_throwsException() {
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("key", AttributeValue.builder().s("value").build());
+        GetItemRequest request = GetItemRequest.builder()
+                .tableName("testTable")
+                .key(key)
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).getItem(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.getItem("testTable", key)
+        );
+    }
+
+    @Test
+    void updateItem_throwsException() {
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("key", AttributeValue.builder().s("value").build());
+        Map<String, AttributeValueUpdate> updates = new HashMap<>();
+        updates.put("attribute", AttributeValueUpdate.builder().value(AttributeValue.builder().s("newValue").build()).build());
+        UpdateItemRequest request = UpdateItemRequest.builder()
+                .tableName("testTable")
+                .key(key)
+                .attributeUpdates(updates)
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).updateItem(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.updateItem("testTable", key, updates)
+        );
+    }
+
+    @Test
+    void deleteItem_throwsException() {
+        Map<String, AttributeValue> key = new HashMap<>();
+        key.put("key", AttributeValue.builder().s("value").build());
+        DeleteItemRequest request = DeleteItemRequest.builder()
+                .tableName("testTable")
+                .key(key)
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).deleteItem(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.deleteItem("testTable", key)
+        );
+    }
+
+    @Test
+    void query_throwsException() {
+        QueryRequest request = QueryRequest.builder()
+                .tableName("testTable")
+                .keyConditionExpression("key = :value")
+                .expressionAttributeNames(Collections.emptyMap())
+                .expressionAttributeValues(Collections.emptyMap())
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).query(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.query("testTable", "key = :value", Collections.emptyMap(), Collections.emptyMap())
+        );
+    }
+
+    @Test
+    void scan_throwsException() {
+        ScanRequest request = ScanRequest.builder()
+                .tableName("testTable")
+                .expressionAttributeNames(Collections.emptyMap())
+                .expressionAttributeValues(Collections.emptyMap())
+                .filterExpression("attribute = :value")
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).scan(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.scan("testTable", Collections.emptyMap(), Collections.emptyMap(), "attribute = :value")
+        );
+    }
+
+    @Test
+    void batchWriteItems_throwsException() {
+        Map<String, List<WriteRequest>> requestItems = new HashMap<>();
+        requestItems.put("testTable", Collections.singletonList(WriteRequest.builder().build()));
+        BatchWriteItemRequest request = BatchWriteItemRequest.builder()
+                .requestItems(requestItems)
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).batchWriteItem(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.batchWriteItems(requestItems)
+        );
+    }
+
+    @Test
+    void batchGetItems_throwsException() {
+        Map<String, KeysAndAttributes> requestItems = new HashMap<>();
+        requestItems.put("testTable", KeysAndAttributes.builder().build());
+        BatchGetItemRequest request = BatchGetItemRequest.builder()
+                .requestItems(requestItems)
+                .build();
+        doThrow(DynamoDbException.class).when(dynamoDbClient).batchGetItem(request);
+
+        assertThrows(DynamoDbSdkException.class, () ->
+                dynamoDbWrapper.batchGetItems(requestItems)
+        );
     }
 }
