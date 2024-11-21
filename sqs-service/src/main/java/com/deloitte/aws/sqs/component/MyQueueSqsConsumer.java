@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import software.amazon.awssdk.services.sqs.SqsClient;
-import software.amazon.awssdk.services.sqs.model.Message;
 
 import java.time.Instant;
 import java.util.concurrent.Executor;
@@ -19,16 +18,13 @@ import java.util.concurrent.Executor;
 public class MyQueueSqsConsumer extends AbstractSqsConsumer<String> {
 
     private static final Logger logger = LoggerFactory.getLogger(MyQueueSqsConsumer.class);
-
+    private static String MESSAGE_PREFIX = "Message sent at ";
     @Value("${my-queue-sqs.url}")
     private String queueUrl;
     @Value("${my-queue-sqs.consumer.maxNumberOfMessages}")
     private Integer maxNumberOfMessages;
     @Value("${my-queue-sqs.consumer.waitTimeSeconds}")
     private Integer waitTimeSeconds;
-
-    private static String MESSAGE_PREFIX = "Message sent at ";
-
     @Autowired
     private MyQueueProducerService myQueueProducerService;
 

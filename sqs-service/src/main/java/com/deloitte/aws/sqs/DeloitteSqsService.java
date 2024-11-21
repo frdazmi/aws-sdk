@@ -4,7 +4,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-@SpringBootApplication(scanBasePackages = {"com.deloitte.aws", "com.deloitte.sdk"})
+@SpringBootApplication
 @EnableScheduling
 public class DeloitteSqsService {
 

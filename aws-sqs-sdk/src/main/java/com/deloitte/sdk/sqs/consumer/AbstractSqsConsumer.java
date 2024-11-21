@@ -18,7 +18,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Abstract class for consuming messages from an Amazon SQS queue.
- * Subclasses must implement the {@link #getConfig()} and {@link #handleMessage(Message)} methods.
+ * Subclasses must implement the {@link #getConfig()} and {@link #handleMessage(T)} methods.
  * subclasses need to call the {@link #pollQueueMessages()} method to start polling the SQS queue.
  * You can use the @Scheduled annotation to schedule this method to run at fixed intervals.
  */
