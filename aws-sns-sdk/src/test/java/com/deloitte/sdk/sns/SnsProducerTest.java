@@ -11,6 +11,8 @@ import software.amazon.awssdk.services.sns.model.PublishRequest;
 import software.amazon.awssdk.services.sns.model.PublishResponse;
 import software.amazon.awssdk.services.sns.model.SnsException;
 
+import java.util.Collections;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
@@ -40,7 +42,7 @@ public class SnsProducerTest {
 
         when(snsClient.publish(any(PublishRequest.class))).thenReturn(publishResponse);
 
-        String result = snsProducer.publishMessage(topicArn, message);
+        String result = snsProducer.publishMessage(topicArn, message, Collections.emptyMap());
 
         assertEquals(messageId, result);
     }
@@ -52,7 +54,7 @@ public class SnsProducerTest {
 
         when(snsClient.publish(any(PublishRequest.class))).thenThrow(SnsException.class);
         Assertions.assertThrows(SnsException.class, () -> {
-            snsProducer.publishMessage(topicArn, message);
+            snsProducer.publishMessage(topicArn, message, null);
         });
     }
 }
