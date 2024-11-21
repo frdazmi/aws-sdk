@@ -16,7 +16,7 @@ import java.time.Instant;
 import java.util.concurrent.Executor;
 
 @Component
-public class MyQueueSqsConsumer extends AbstractSqsConsumer {
+public class MyQueueSqsConsumer extends AbstractSqsConsumer<String> {
 
     private static final Logger logger = LoggerFactory.getLogger(MyQueueSqsConsumer.class);
 
@@ -53,8 +53,8 @@ public class MyQueueSqsConsumer extends AbstractSqsConsumer {
     }
 
     @Override
-    protected void handleMessage(Message message) {
-        logger.info("Received message at {} : {}", Instant.now(), message.body());
+    protected void handleMessage(String message) {
+        logger.info("Received message at {} : {}", Instant.now(), message);
         logger.info("Sending message to another queue");
         myQueueProducerService.sendMessage(MESSAGE_PREFIX + Instant.now());
     }

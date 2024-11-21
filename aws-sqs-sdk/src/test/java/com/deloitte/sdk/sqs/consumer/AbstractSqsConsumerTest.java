@@ -66,7 +66,7 @@ public class AbstractSqsConsumerTest {
         verify(sqsClient, times(0)).deleteMessage(any(DeleteMessageRequest.class));
     }
 
-    private static class TestSqsConsumer extends AbstractSqsConsumer {
+    private static class TestSqsConsumer extends AbstractSqsConsumer<String> {
 
         public TestSqsConsumer(SqsClient sqsClient, Executor workerPool) {
             super(sqsClient, workerPool);
@@ -82,10 +82,10 @@ public class AbstractSqsConsumerTest {
         }
 
         @Override
-        protected void handleMessage(Message message) throws Exception {
-            if (message.body().equalsIgnoreCase("exception")) {
+        protected void handleMessage(String message) throws Exception {
+            if (message.equalsIgnoreCase("exception")) {
                 throw new Exception("Test exception");
-            } else if (message.body().equalsIgnoreCase("skip")) {
+            } else if (message.equalsIgnoreCase("skip")) {
                 throw new SkipTaskException("Test skip");
             }
         }

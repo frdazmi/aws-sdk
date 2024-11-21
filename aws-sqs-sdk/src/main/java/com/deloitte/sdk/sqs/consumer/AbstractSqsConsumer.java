@@ -2,6 +2,7 @@ package com.deloitte.sdk.sqs.consumer;
 
 
 import com.deloitte.sdk.sqs.exceptions.SkipTaskException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.Builder;
 import lombok.Getter;
 import org.slf4j.Logger;
@@ -11,6 +12,7 @@ import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 
+import java.lang.reflect.ParameterizedType;
 import java.util.concurrent.Executor;
 
 
@@ -20,7 +22,7 @@ import java.util.concurrent.Executor;
  * subclasses need to call the {@link #pollQueueMessages()} method to start polling the SQS queue.
  * You can use the @Scheduled annotation to schedule this method to run at fixed intervals.
  */
-public abstract class AbstractSqsConsumer {
+public abstract class AbstractSqsConsumer<T> {
 
     private static final Logger logger = LoggerFactory.getLogger(AbstractSqsConsumer.class);
     private final SqsClient sqsClient;
@@ -44,7 +46,7 @@ public abstract class AbstractSqsConsumer {
                 .messages()
                 .forEach(message -> workerPool.execute(() -> {
                     try {
-                        handleMessage(message);
+                        handleMessage(convertIntoObject(message));
                         deleteMessage(config.getQueueUrl(), message);
                     } catch (SkipTaskException e) {
                         logger.info("Skipping message: {}", message.body());
@@ -57,13 +59,28 @@ public abstract class AbstractSqsConsumer {
 
     protected abstract Config getConfig();
 
-    protected abstract void handleMessage(Message message) throws Exception;
+    protected abstract void handleMessage(T message) throws Exception;
 
     private void deleteMessage(String queueUrl, Message message) {
         sqsClient.deleteMessage(DeleteMessageRequest.builder()
                 .queueUrl(queueUrl)
                 .receiptHandle(message.receiptHandle())
                 .build());
+    }
+
+    private T convertIntoObject(Message message) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            return mapper.readValue(message.body(), getGenericType());
+        } catch (Exception e) {
+            logger.error("Error converting message to object: {}", message.body(), e);
+        }
+        return null;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<T> getGenericType() {
+        return (Class<T>) ((ParameterizedType) getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
 
     @Builder
